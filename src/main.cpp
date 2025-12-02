@@ -34,7 +34,7 @@ WebServer server(80);
 WiFiServer streamServer(81);
 
 // Camera Settings
-bool flashState = true;
+bool flashState = false;
 int brightness = 0;      // Range: -2 to 2
 int saturation = 0;      // Range: -2 to 2
 const int SENSOR_BRIGHTNESS = 1;
@@ -59,6 +59,11 @@ String photoPathForSeq(unsigned long seq) {
   return String("/photo_") + String(seq) + ".jpg";
 }
 
+void addCors() {
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.sendHeader("Access-Control-Allow-Headers", "*");
+  server.sendHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+}
 // Add a new photo entry (save seq into circular buffer); delete overwritten file if any
 void addPhotoSeq(unsigned long seq) {
   // if not full, append at (photoStart + photoCount)
@@ -518,6 +523,7 @@ void handleNotify() {
 
 // return last event info as JSON: { seq: N, status: "ok"/"bad", id: "..." }
 void handleLastEvent() {
+    addCors();
     unsigned long seq;
     String status;
     String id;
@@ -602,7 +608,13 @@ void handleStream() {
             }
             
             if (request.indexOf("GET /stream") != -1) {
-                String response = "HTTP/1.1 200 OK\r\nContent-Type: multipart/x-mixed-replace; boundary=frame\r\n\r\n";
+                String response =
+                "HTTP/1.1 200 OK\r\n"
+                "Access-Control-Allow-Origin: *\r\n"
+                "Access-Control-Allow-Headers: *\r\n"
+                "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
+                "Content-Type: multipart/x-mixed-replace; boundary=frame\r\n\r\n";
+
                 newClient.write(response.c_str(), response.length());
                 streamClient = newClient;
                 streamActive = true;
