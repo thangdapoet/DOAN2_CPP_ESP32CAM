@@ -684,6 +684,9 @@ void setup() {
         Serial.print(".");
     }
     Serial.printf("\nConnected! IP: %s\n", WiFi.localIP().toString().c_str());
+    lastEventSeq = 0;
+    lastEventStatus = "";
+    lastEventId = "";
 
     // Hardware Setup
     pinMode(LED_GPIO_NUM, OUTPUT);
@@ -700,7 +703,7 @@ void setup() {
     server.on("/set_saturation", handleSetSaturation);
 
     // notify + last_event + photos endpoints
-    server.on("/notify", HTTP_GET, handleNotify);
+    server.on("/notify", HTTP_POST, handleNotify);
     server.on("/last_event", HTTP_GET, handleLastEvent);
     server.on("/photos_list", HTTP_GET, handlePhotosList);
     server.on("/photo", HTTP_GET, handlePhoto);
