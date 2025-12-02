@@ -434,12 +434,14 @@ const char html_page[] PROGMEM = R"rawliteral(
 
 // ==================== HTTP HANDLERS ====================
 void handleRoot() {
+    addCors();
     String page = FPSTR(html_page);
     page.replace("%HOST%", WiFi.localIP().toString());
     server.send(200, "text/html", page);
 }
 
 void handleCameraState() {
+    addCors();
     String json = String("{\"flashState\":") + (flashState ? "true" : "false") + 
                   ",\"brightness\":" + String(brightness) + 
                   ",\"saturation\":" + String(saturation) + "}";
@@ -447,6 +449,7 @@ void handleCameraState() {
 }
 
 void handleToggleFlash() {
+    addCors();
     flashState = !flashState;
     digitalWrite(LED_GPIO_NUM, flashState ? HIGH : LOW);
     Serial.printf("Flash -> %s\n", flashState ? "ON" : "OFF");
@@ -454,6 +457,7 @@ void handleToggleFlash() {
 }
 
 void handleSetBrightness() {
+    addCors();
     if (server.hasArg("value")) {
         brightness = server.arg("value").toInt();
         sensor_t* s = esp_camera_sensor_get();
@@ -466,6 +470,7 @@ void handleSetBrightness() {
 }
 
 void handleSetSaturation() {
+    addCors();
     if (server.hasArg("value")) {
         saturation = server.arg("value").toInt();
         sensor_t* s = esp_camera_sensor_get();
@@ -477,6 +482,7 @@ void handleSetSaturation() {
 
 // notify handler: read status & optional id, print Serial, store lastEvent, capture photo and save to SPIFFS
 void handleNotify() {
+    addCors();
     String status = "";
     String id = "";
     if (server.hasArg("status")) status = server.arg("status");
@@ -543,12 +549,14 @@ void handleLastEvent() {
 
 // return photo list JSON array [seq_oldest, ..., seq_newest]
 void handlePhotosList() {
+    addCors();
     String listJson = buildPhotoListJson();
     server.send(200, "application/json", listJson);
 }
 
 // serve photo file for given seq: /photo?seq=<N>
 void handlePhoto() {
+    addCors();
     if (!server.hasArg("seq")) {
         server.send(400, "text/plain", "Missing seq");
         return;
